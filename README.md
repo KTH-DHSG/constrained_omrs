@@ -5,8 +5,10 @@ Code accompanying the paper **“Safe Formation Control of Open Multi-Robot Syst
 This repository implements distributed barrier-Lyapunov-function (BLF) formation control for open multi-robot systems whose members may join and leave during operation. Team reconfiguration is handled through **prospective edges**, auxiliary relaxation dynamics for temporarily enlarged connectivity bounds, and a **make-before-break** strategy for connectivity-critical departures.
 
 <p align="center">
-  <img src="docs/assets/open_formation_point_mass.gif" alt="Open multi-robot formation-control simulation" width="760">
+  <img src="docs/assets/open_formation_point_mass.gif" alt="Double-integrator open multi-robot formation-control simulation" width="48%">
+  <img src="docs/assets/open_formation_quadrotor_rotor.gif" alt="Rotor-level quadrotor open multi-robot formation-control simulation" width="48%">
 </p>
+<p align="center"><em>Left: paper-level double-integrator model. Right: rotor-level 6-DoF quadrotor simulation.</em></p>
 
 The repository provides four validation levels, from the model analyzed in the paper to full ROS 2/Gazebo simulation:
 

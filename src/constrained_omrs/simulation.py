@@ -252,9 +252,15 @@ def simulate(
     service_position_tolerance = 0.15
     service_speed_tolerance = 0.12
     takeoff_settle_time = 0.80
+    # Hand prospective control a meaningful part of the rendezvous instead of
+    # waiting until the candidate is almost in its final formation slot.  The
+    # lower-margin gate keeps the handoff away from the collision boundary,
+    # while FormationManager initializes rho so every new edge is deliberately
+    # inside the relaxed upper boundary.
     join_capture_margin = 0.50
-    join_capture_error_tolerance = 0.75
-    join_capture_speed_tolerance = 0.30
+    join_capture_lower_margin = 0.20
+    join_capture_error_tolerance = 1.10
+    join_capture_speed_tolerance = 0.45
     formation_maximum_acceleration = 0.85
 
     def limit_vector_norm(vector: np.ndarray, limit: float) -> np.ndarray:
@@ -360,7 +366,8 @@ def simulate(
         candidates.sort()
         selected = candidates[: request.num_edges]
         within_capture = all(
-            distance <= scenario.sensing_distance + join_capture_margin
+            scenario.collision_distance + join_capture_lower_margin <= distance
+            <= scenario.sensing_distance + join_capture_margin
             for distance, _ in selected
         )
         errors = []

@@ -105,7 +105,7 @@ The main mission then follows this sequence:
 6. robot `3` departure request at `95 s`;
 7. final settling and, when enabled, return of all remaining vehicles to their charging pads.
 
-A joining drone first uses the service-flight controller to take off and approach the translation-aligned target formation. Prospective edges are assigned only after the capture checks are met. The candidate then runs prospective BLF control before admission, followed by the configured smooth whole-controller handover.
+A joining drone first uses the service-flight controller to take off and enter a coarse rendezvous region around its future neighbors. Prospective edges are then assigned before the service controller has completed the final geometric rendezvous, so the candidate-only prospective controller owns a visible part of the approach. The capture gate requires the selected future-edge distances to stay at least `join_capture_lower_margin` above `d_min`, while `FormationManager` initializes `rho` so the current distance is separated from the relaxed upper boundary by the configured activation and initial-relaxation margins. Admission is followed by the configured smooth whole-controller handover.
 
 A connectivity-critical departure uses make-before-break: bridge edges are established first, bridge activation and robot removal are separate topology switches, and the departing vehicle then returns independently to its pad.
 

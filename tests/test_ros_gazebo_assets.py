@@ -337,7 +337,9 @@ def test_gazebo_join_uses_rendezvous_capture_before_prospective_edges() -> None:
     assert "_join_capture_ready" in controller
     assert "rendezvous capture reached; enabling prospective edges" in controller
     assert 'self.declare_parameter("join_capture_margin", 0.50)' in controller
+    assert 'self.declare_parameter("join_capture_lower_margin", 0.20)' in controller
     assert "join_capture_margin: 0.50" in config
+    assert "join_capture_lower_margin: 0.20" in config
     assert "rho_initial_margin: 0.22" in config
     assert "rho_contraction_rate: 0.10" in config
     assert "activation_distance_margin: 0.08" in config
@@ -411,10 +413,11 @@ def test_gazebo_join_capture_uses_relative_vector_error_and_real_prospective_pha
     controller = (ROOT / "src" / "constrained_omrs_ros" / "gazebo_controller.py").read_text()
     reconfiguration = (ROOT / "src" / "constrained_omrs" / "reconfiguration.py").read_text()
     config = (ROOT / "config" / "gazebo_controller.yaml").read_text()
-    assert 'self.declare_parameter("join_capture_error_tolerance", 0.75)' in controller
+    assert 'self.declare_parameter("join_capture_error_tolerance", 1.10)' in controller
     assert "actual_relative - desired_relative" in controller
-    assert "join_capture_error_tolerance: 0.75" in config
-    assert "join_capture_speed_tolerance: 0.30" in config
+    assert "self.scenario.collision_distance + self.join_capture_lower_margin" in controller
+    assert "join_capture_error_tolerance: 1.10" in config
+    assert "join_capture_speed_tolerance: 0.45" in config
     assert "join_prospective_min_duration: 2.5" in config
     assert "join_activation_error_tolerance: 0.45" in config
     assert "state.assigned_at" in reconfiguration

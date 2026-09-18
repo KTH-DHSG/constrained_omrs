@@ -24,19 +24,19 @@ This page distinguishes the **paper-level/pure-Python scenario parameters** from
 
 ## Controller configuration
 
-`ControllerConfig` defines the high-level BLF/backstepping controller.
+`ControllerConfig` defines the high-level BLF/backstepping controller. The pure-Python entry point uses one tuning for the paper-level point-mass model and a separate, moderately softer tuning for the two quadrotor models. Gazebo uses its own physical-realization tuning from `config/gazebo_controller.yaml`.
 
-| Field | Class default | Paper-model example | Physical Python / Gazebo |
-|---|---:|---:|---:|
-| `k1` | `1.0` | `1.0` | `0.30` |
-| `k2` | `1.0` | `0.8` | `0.30` |
-| `k3` | `2.0` | `2.5` | `1.25` |
-| `max_virtual_speed` | `0.8` m/s | `0.8` m/s | `0.35` m/s |
-| `collision_weight` | `0.02` | `0.02` | `0.02` |
-| `max_edge_damping` | `0.60` m/s² per edge | `0.60` | `0.22` |
-| `max_local_damping` | `1.00` m/s² | `1.00` | `0.38` |
+| Field | Class default | Point-mass CLI | Quadrotor / rotor CLI | Gazebo |
+|---|---:|---:|---:|---:|
+| `k1` | `1.0` | `1.0` | `0.50` | `0.30` |
+| `k2` | `1.0` | `0.80` | `0.50` | `0.30` |
+| `k3` | `2.0` | `2.50` | `2.00` | `1.25` |
+| `max_virtual_speed` | `0.8 m/s` | `0.8 m/s` | `0.6 m/s` | `0.35 m/s` |
+| `collision_weight` | `0.02` | `0.02` | `0.02` | `0.02` |
+| `max_edge_damping` | `0.60 m/s²` per edge | class default | class default | `0.22 m/s²` per edge |
+| `max_local_damping` | `1.00 m/s²` | class default | class default | `0.38 m/s²` |
 
-The two damping limits act on the smooth dissipative terms inside the backstepping law; they do not clip the final theoretical control vector.
+The two damping limits act on the smooth dissipative terms inside the backstepping law; they do not clip the final theoretical control vector. In the physical Python simulation, the translational command is additionally limited to `0.85 m/s²` before the quadrotor realization.
 
 ## Default 3-D scenario
 
@@ -68,7 +68,7 @@ These coordinates are one representative of the desired formation; only relative
 
 ## Pure-Python reconfiguration settings
 
-The 3-D `Scenario` uses:
+The 3-D `Scenario` uses the same reconfiguration parameters for all three pure-Python dynamics modes:
 
 | Field | Value | Meaning |
 |---|---:|---|
@@ -78,22 +78,11 @@ The 3-D `Scenario` uses:
 | `edge_activation_margin` | `0.08 m` | Interior margin protected from the relaxed upper boundary |
 | `edge_activation_outward_rate_tolerance` | `0.10 m/s` | Outward radial-rate tolerance at activation |
 | `min_switch_dwell_time` | `1.0 s` | Minimum interval between topology switches |
-| `join_handover_duration` | `0.0 s` | Generic scenario default; physical Python modes override to `6.0 s` |
-| `join_prospective_min_duration` | `0.0 s` | Generic scenario default; physical Python modes override to `2.5 s` |
-| `join_activation_error_tolerance` | `inf` | Generic scenario default; physical Python modes override to `0.45 m` |
+| `join_handover_duration` | `0.0 s` | Pure-Python scenario default |
+| `join_prospective_min_duration` | `0.0 s` | Pure-Python scenario default |
+| `join_activation_error_tolerance` | `inf` | Pure-Python scenario default |
 
-For `quadrotor` and `quadrotor_rotor`, `examples/run_open_formation.py` overrides the physical reconfiguration tuning to
-
-```text
-rho_initial_margin                  0.22 m
-rho_contraction_rate                0.10 m/s
-edge_activation_outward_rate_tol    0.08 m/s
-join_handover_duration              6.0 s
-join_prospective_min_duration       2.5 s
-join_activation_error_tolerance     0.45 m
-```
-
-while retaining the scenario's `lambda_rho`, activation-distance margin, and switch dwell time.
+The physical Python modes additionally use the service-flight capture logic in `simulation.py` before the formation manager creates the prospective joining edges. This service layer does **not** replace the scenario reconfiguration parameters above. Gazebo, by contrast, explicitly replaces several reconfiguration values from `config/gazebo_controller.yaml`; those values are listed below.
 
 ## Quadrotor model
 
@@ -105,11 +94,11 @@ while retaining the scenario's `lambda_rho`, activation-distance margin, and swi
 | Inertia | `diag(0.018, 0.018, 0.032) kg m²` |
 | Gravity | `9.81 m/s²` |
 | Linear drag | `0.10` |
-| Attitude gain | `4.0` class default; physical example uses `1.8` |
-| Angular-velocity gain | `0.70` class default; physical example uses `0.50` |
+| Attitude gain | `4.0` in the pure-Python quadrotor modes; Gazebo uses `1.8` |
+| Angular-velocity gain | `0.70` in the pure-Python quadrotor modes; Gazebo uses `0.50` |
 | Maximum total thrust | `28 N` |
-| Maximum torque | `1.50 N m` class default; physical example uses `0.70 N m` |
-| Maximum tilt | `35 deg` class default; physical example uses `25 deg` |
+| Maximum torque | `1.50 N m` in pure Python; Gazebo uses `0.70 N m` |
+| Maximum tilt | `35 deg` in pure Python; Gazebo uses `25 deg` |
 | Arm length | `0.23 m` |
 | Body radius | `0.075 m` |
 | Body height | `0.07 m` |
@@ -136,7 +125,7 @@ The scenario-level `ChargingAreaConfig` is:
 | `landing_speed_tolerance` | `0.20 m/s` |
 | `platform_padding` | `0.34 m` |
 
-The physical pure-Python joining service layer deliberately uses more conservative internal limits matching the Gazebo validation: `0.45 m/s` maximum speed, `0.90 m/s²` maximum acceleration, position gain `0.45`, velocity gain `2.20`, and `0.85 m/s²` as the final formation-acceleration envelope.
+The physical pure-Python joining service layer uses `0.45 m/s` maximum speed, `0.90 m/s²` maximum acceleration, position gain `0.45`, velocity gain `2.20`, and `0.85 m/s²` as the final formation-acceleration envelope. These service-flight limits are intentionally close to the Gazebo realization, while the pure-Python formation and attitude gains remain those selected by `examples/run_open_formation.py` and `QuadrotorConfig`.
 
 ## Gazebo controller parameters
 
@@ -171,8 +160,11 @@ When launched through `open_team_gazebo.launch.py`, `config/gazebo_controller.ya
 | `takeoff_settle_time` | `0.80 s` |
 | `service_settle_time` | `1.20 s` |
 | `join_capture_margin` | `0.50 m` |
-| `join_capture_error_tolerance` | `0.75 m` |
-| `join_capture_speed_tolerance` | `0.30 m/s` |
+| `join_capture_lower_margin` | `0.20 m` |
+| `join_capture_error_tolerance` | `1.10 m` |
+| `join_capture_speed_tolerance` | `0.45 m/s` |
+
+The join-capture values are intentionally chosen so that prospective control starts before the service controller has completed the rendezvous, but not near a BLF singularity. The lower-distance gate keeps the new interaction away from the collision boundary; on the upper side, `_assign_prospective()` initializes `rho` with `rho_initial_margin` in addition to `activation_distance_margin`, giving a deliberate interior buffer from `d_max + rho`.
 
 ### High-level formation controller
 

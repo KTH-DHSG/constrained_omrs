@@ -47,7 +47,7 @@ uv run --no-sync python examples/run_open_formation.py --dimension 3 --dynamics 
 uv run --no-sync python examples/run_open_formation.py --dimension 3 --dynamics quadrotor_rotor --animation
 ```
 
-The physical quadrotor modes use the conservative formation and attitude tuning employed by the Gazebo validation and add a service-flight stage for a joining vehicle before prospective BLF control starts.
+The physical quadrotor modes use the same high-level controller with the quadrotor-specific CLI tuning and add a service-flight stage for a joining vehicle before prospective BLF control starts. The handoff is deliberately made before the service controller has completed the geometric rendezvous: prospective control owns the final approach, while capture checks keep the candidate away from the collision boundary and the relaxation initialization keeps the new edge comfortably inside its relaxed upper boundary.
 
 ## CLI reference
 

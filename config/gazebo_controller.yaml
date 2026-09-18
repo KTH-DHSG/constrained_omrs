@@ -85,16 +85,20 @@ open_team_gazebo_controller:
     takeoff_settle_time: 0.80
     service_settle_time: 1.20
 
-    # A joining drone approaches the translation-aligned desired formation
-    # under the service controller first.  The handoff is based on both scalar
-    # distance and the relative-vector error: being merely inside d_max is not
-    # enough to characterize closeness to the prospective formation set.
-    # Hand prospective control a larger part of the rendezvous.  The vector-
-    # error guard still prevents assignment on the wrong side of a neighbor,
-    # but the candidate no longer needs to be almost at the final edge set.
-    join_capture_margin: 0.50
-    join_capture_error_tolerance: 0.75 # m; prospective edges start visibly farther away
-    join_capture_speed_tolerance: 0.30 # m/s
+    # A joining drone first leaves the charging area under the service
+    # controller, but prospective BLF control now takes over noticeably earlier
+    # in the rendezvous.  The selected future neighbors must lie in a coarse
+    # capture annulus: not too close to the collision boundary and not farther
+    # than d_max + join_capture_margin.  FormationManager then initializes rho
+    # so the new edge is still comfortably inside the relaxed upper boundary:
+    # the singularity is at least activation_distance_margin +
+    # rho_initial_margin = 0.30 m beyond the current distance.
+    join_capture_margin: 0.50          # m beyond d_max
+    join_capture_lower_margin: 0.20    # m above d_min
+    # Keep only a broad relative-vector sanity guard. Candidate-only prospective
+    # control is intentionally responsible for the final geometric rendezvous.
+    join_capture_error_tolerance: 1.10 # m
+    join_capture_speed_tolerance: 0.45 # m/s (service-flight speed scale)
 
     diagnostic_log_period: 1.0
 

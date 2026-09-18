@@ -85,12 +85,13 @@ class OpenTeamGazeboController(Node):
         # nominal sensing radius. This prevents a far-away joining robot from
         # pulling the established team through a very large prospective BLF.
         self.declare_parameter("join_capture_margin", 0.50)
+        self.declare_parameter("join_capture_lower_margin", 0.20)
         # Capture is based on the prospective relative-vector error as well as
         # scalar distance.  The previous distance-only gate could trigger while
         # the candidate was on the wrong side of its neighbors, with edge
         # errors around 1.8 m despite admissible pairwise distances.
-        self.declare_parameter("join_capture_error_tolerance", 0.75)
-        self.declare_parameter("join_capture_speed_tolerance", 0.30)
+        self.declare_parameter("join_capture_error_tolerance", 1.10)
+        self.declare_parameter("join_capture_speed_tolerance", 0.45)
         self.declare_parameter("diagnostic_log_period", 1.0)
         self.declare_parameter("attitude_gain", 1.8)
         self.declare_parameter("angular_velocity_gain", 0.50)
@@ -164,6 +165,9 @@ class OpenTeamGazeboController(Node):
         self.takeoff_settle_time = float(self.get_parameter("takeoff_settle_time").value)
         self.service_settle_time = float(self.get_parameter("service_settle_time").value)
         self.join_capture_margin = float(self.get_parameter("join_capture_margin").value)
+        self.join_capture_lower_margin = float(
+            self.get_parameter("join_capture_lower_margin").value
+        )
         self.join_capture_error_tolerance = float(
             self.get_parameter("join_capture_error_tolerance").value
         )
@@ -247,6 +251,8 @@ class OpenTeamGazeboController(Node):
                 raise ValueError(f"{name} must be positive.")
         if self.initial_takeoff_stagger < 0.0:
             raise ValueError("initial_takeoff_stagger must be nonnegative.")
+        if self.join_capture_margin < 0.0 or self.join_capture_lower_margin < 0.0:
+            raise ValueError("join capture margins must be nonnegative.")
         if self.formation_acceleration_rate_limit < 0.0:
             raise ValueError("formation_acceleration_rate_limit must be nonnegative.")
         if self.activation_outward_rate_tolerance < 0.0:
@@ -777,7 +783,8 @@ class OpenTeamGazeboController(Node):
         candidates.sort()
         selected = candidates[: request.num_edges]
         within_capture = all(
-            distance <= self.scenario.sensing_distance + self.join_capture_margin
+            self.scenario.collision_distance + self.join_capture_lower_margin <= distance
+            <= self.scenario.sensing_distance + self.join_capture_margin
             for distance, _ in selected
         )
         # Scalar distance alone is not enough: a candidate can be within the
