@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="omrs_quadrotor">
+    <static>false</static>
+    <self_collide>false</self_collide>
+
+    <link name="base_link">
+      <inertial>
+        <mass>1.196</mass>
+        <inertia>
+          <ixx>0.0178</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.0178</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.0318</izz>
+        </inertia>
+      </inertial>
+
+      <collision name="body_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.075</radius>
+            <length>0.070</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name="body_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.075</radius>
+            <length>0.070</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.08 0.12 0.16 1</ambient>
+          <diffuse>0.10 0.22 0.34 1</diffuse>
+          <specular>0.25 0.25 0.25 1</specular>
+        </material>
+      </visual>
+
+      <visual name="arm_ne_sw">
+        <pose>0 0 0.005 0 0 0.78539816339</pose>
+        <geometry><box><size>0.460 0.022 0.018</size></box></geometry>
+        <material>
+          <ambient>0.08 0.08 0.09 1</ambient>
+          <diffuse>0.14 0.14 0.16 1</diffuse>
+        </material>
+      </visual>
+      <visual name="arm_nw_se">
+        <pose>0 0 0.005 0 0 -0.78539816339</pose>
+        <geometry><box><size>0.460 0.022 0.018</size></box></geometry>
+        <material>
+          <ambient>0.08 0.08 0.09 1</ambient>
+          <diffuse>0.14 0.14 0.16 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- A small red nose marker makes yaw / body-x visually obvious. -->
+      <visual name="nose_marker">
+        <pose>0.095 0 0.018 0 0 0</pose>
+        <geometry><box><size>0.045 0.035 0.025</size></box></geometry>
+        <material>
+          <ambient>0.65 0.05 0.04 1</ambient>
+          <diffuse>0.90 0.08 0.05 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Four landing legs. With the model center at z=0.16 m, the feet rest
+           on a charging platform whose top surface is at z=0.03 m. -->
+      <collision name="leg_fl_collision">
+        <pose>0.085 0.085 -0.080 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.100</length></cylinder></geometry>
+      </collision>
+      <collision name="leg_fr_collision">
+        <pose>0.085 -0.085 -0.080 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.100</length></cylinder></geometry>
+      </collision>
+      <collision name="leg_rl_collision">
+        <pose>-0.085 0.085 -0.080 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.100</length></cylinder></geometry>
+      </collision>
+      <collision name="leg_rr_collision">
+        <pose>-0.085 -0.085 -0.080 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.100</length></cylinder></geometry>
+      </collision>
+
+      <visual name="leg_fl_visual">
+        <pose>0.085 0.085 -0.080 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.100</length></cylinder></geometry>
+        <material><diffuse>0.07 0.07 0.08 1</diffuse></material>
+      </visual>
+      <visual name="leg_fr_visual">
+        <pose>0.085 -0.085 -0.080 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.100</length></cylinder></geometry>
+        <material><diffuse>0.07 0.07 0.08 1</diffuse></material>
+      </visual>
+      <visual name="leg_rl_visual">
+        <pose>-0.085 0.085 -0.080 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.100</length></cylinder></geometry>
+        <material><diffuse>0.07 0.07 0.08 1</diffuse></material>
+      </visual>
+      <visual name="leg_rr_visual">
+        <pose>-0.085 -0.085 -0.080 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.100</length></cylinder></geometry>
+        <material><diffuse>0.07 0.07 0.08 1</diffuse></material>
+      </visual>
+    </link>
+
+    <!-- Rotor ordering matches QuadrotorConfig.rotor_positions_body:
+         0=(+,+), 1=(-,+), 2=(-,-), 3=(+,-). -->
+    <link name="rotor_0">
+      <pose relative_to="base_link">0.16263456 0.16263456 0.025 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>0.000006</ixx><ixy>0</ixy><ixz>0</ixz><iyy>0.000006</iyy><iyz>0</iyz><izz>0.000012</izz></inertia></inertial>
+      <visual name="propeller"><geometry><cylinder><radius>0.110</radius><length>0.004</length></cylinder></geometry><material><diffuse>0.12 0.12 0.13 0.68</diffuse></material></visual>
+    </link>
+    <link name="rotor_1">
+      <pose relative_to="base_link">-0.16263456 0.16263456 0.025 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>0.000006</ixx><ixy>0</ixy><ixz>0</ixz><iyy>0.000006</iyy><iyz>0</iyz><izz>0.000012</izz></inertia></inertial>
+      <visual name="propeller"><geometry><cylinder><radius>0.110</radius><length>0.004</length></cylinder></geometry><material><diffuse>0.12 0.12 0.13 0.68</diffuse></material></visual>
+    </link>
+    <link name="rotor_2">
+      <pose relative_to="base_link">-0.16263456 -0.16263456 0.025 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>0.000006</ixx><ixy>0</ixy><ixz>0</ixz><iyy>0.000006</iyy><iyz>0</iyz><izz>0.000012</izz></inertia></inertial>
+      <visual name="propeller"><geometry><cylinder><radius>0.110</radius><length>0.004</length></cylinder></geometry><material><diffuse>0.12 0.12 0.13 0.68</diffuse></material></visual>
+    </link>
+    <link name="rotor_3">
+      <pose relative_to="base_link">0.16263456 -0.16263456 0.025 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>0.000006</ixx><ixy>0</ixy><ixz>0</ixz><iyy>0.000006</iyy><iyz>0</iyz><izz>0.000012</izz></inertia></inertial>
+      <visual name="propeller"><geometry><cylinder><radius>0.110</radius><length>0.004</length></cylinder></geometry><material><diffuse>0.12 0.12 0.13 0.68</diffuse></material></visual>
+    </link>
+
+    <joint name="rotor_0_joint" type="revolute">
+      <parent>base_link</parent><child>rotor_0</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1000000</lower><upper>1000000</upper><effort>1000000</effort><velocity>1000000</velocity></limit></axis>
+    </joint>
+    <joint name="rotor_1_joint" type="revolute">
+      <parent>base_link</parent><child>rotor_1</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1000000</lower><upper>1000000</upper><effort>1000000</effort><velocity>1000000</velocity></limit></axis>
+    </joint>
+    <joint name="rotor_2_joint" type="revolute">
+      <parent>base_link</parent><child>rotor_2</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1000000</lower><upper>1000000</upper><effort>1000000</effort><velocity>1000000</velocity></limit></axis>
+    </joint>
+    <joint name="rotor_3_joint" type="revolute">
+      <parent>base_link</parent><child>rotor_3</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1000000</lower><upper>1000000</upper><effort>1000000</effort><velocity>1000000</velocity></limit></axis>
+    </joint>
+  </model>
+</sdf>

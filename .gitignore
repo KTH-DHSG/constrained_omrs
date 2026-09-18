@@ -1,0 +1,105 @@
+# -----------------------------------------------------------------------------
+# Python
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging / build artifacts
+*.egg-info/
+.eggs/
+dist/
+build/
+wheelhouse/
+
+# uv
+# This repository uses `uv venv` + `uv pip install`; no lockfile is required.
+uv.lock
+
+# Test / coverage / static-analysis caches
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.pyright/
+.ruff_cache/
+.hypothesis/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# -----------------------------------------------------------------------------
+# ROS 2 / colcon
+# -----------------------------------------------------------------------------
+build/
+install/
+log/
+.colcon/
+
+# rosbag / recorded middleware data
+rosbag2_*/
+*.db3
+*.mcap
+*.bag
+
+# -----------------------------------------------------------------------------
+# Simulation outputs
+# -----------------------------------------------------------------------------
+outputs/
+results/
+logs/
+
+# Common generated media outside the documentation assets
+*.mp4
+*.avi
+*.mov
+
+# Keep GIFs trackable because the README embeds docs/assets/*.gif
+
+# -----------------------------------------------------------------------------
+# Gazebo / simulation transient files
+# -----------------------------------------------------------------------------
+*.log
+*.pid
+*.tmp
+*.temp
+
+# -----------------------------------------------------------------------------
+# Editors / IDEs
+# -----------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# -----------------------------------------------------------------------------
+# OS metadata
+# -----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------------------------------------------------------
+# Local secrets / environment overrides
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# -----------------------------------------------------------------------------
+# Miscellaneous local archives / backups
+# -----------------------------------------------------------------------------
+*.bak
+*.orig
+*.rej
+*.zip

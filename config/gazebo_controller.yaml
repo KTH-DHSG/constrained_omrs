@@ -1,0 +1,136 @@
+open_team_gazebo_controller:
+  ros__parameters:
+    use_sim_time: true
+    control_rate_hz: 100.0
+    marker_rate_hz: 10.0
+    odom_timeout: 0.25
+
+    # T_max = k_f * omega_max^2 = 7 N at 900 rad/s.
+    motor_constant: 8.641975308641975e-6
+    maximum_rotor_velocity: 900.0
+
+    # Conservative geometric attitude loop for Gazebo's motor / rigid-body
+    # dynamics.
+    attitude_gain: 1.8
+    angular_velocity_gain: 0.50
+    maximum_torque: 0.70
+    maximum_tilt_deg: 25.0
+
+    # Paper-level OMRS coordination gains used in Gazebo.  These are deliberately
+    # softer than the original pure-Python demonstration.  In addition, the
+    # commanded translational acceleration passes through a magnitude envelope
+    # before the geometric controller.  A slow slew limiter is deliberately
+    # disabled: it introduced enough phase lag to destabilize even fixed-team
+    # formation convergence. Topology switches are smoothed explicitly.
+    formation_k1: 0.30
+    formation_k2: 0.30
+    formation_k3: 1.25
+    formation_max_virtual_speed: 0.35
+
+    # Collision-only proximity barrier for physical safety. Established edges
+    # and prospective bridge edges already contain a symmetric lower-distance
+    # BLF. Candidate-only joining edges remain in this all-pairs collision layer
+    # so the existing neighbor can still repel for safety without chasing the
+    # candidate's prospective formation objective.
+    formation_collision_weight: 0.02
+
+    # Smooth radial saturation is applied to the two dissipative terms *inside*
+    # the backstepping law.  This bounds transient damping action without
+    # clipping away its Lyapunov sign.  The 0.85 m/s^2 norm cap below remains
+    # only as a final physical envelope for the Gazebo realization.
+    formation_max_edge_damping: 0.22   # m/s^2 per interaction edge
+    formation_max_local_damping: 0.38  # m/s^2 per robot
+
+    formation_maximum_acceleration: 0.85
+    formation_acceleration_rate_limit: 0.0   # disabled; set >0 only for dedicated tests
+
+    # Prospective-edge relaxation. The nominal contraction is linear, so the
+    # relaxed radius shrinks at a prescribed physical speed instead of fastest
+    # when rho is large. A projected rate preserves an interior buffer from the
+    # relaxed upper boundary. This protected margin must remain compatible
+    # with the desired geometry of every edge; the initial relaxed-boundary
+    # margin is controlled independently by rho_initial_margin.
+    rho_initial_margin: 0.22
+    rho_contraction_rate: 0.10       # m/s
+    activation_distance_margin: 0.08 # m
+    activation_outward_rate_tolerance: 0.08  # m/s
+
+    # Bumpless admission of a new edge. The joining robot already responds at
+    # full strength before admission. After the topology switch we evaluate the
+    # complete candidate-only pre-switch controller and the complete symmetric
+    # post-switch controller at the same state and blend the two acceleration
+    # laws with a C2 quintic smootherstep. A long transition lets the candidate
+    # reduce its formation error before the old team feels the new interaction.
+    join_handover_duration: 6.0       # s
+    # The candidate-only prospective controller must be active for a real
+    # interval before admission.  This prevents creation and activation in the
+    # same 100-Hz manager update when rho is initialized directly at zero.
+    join_prospective_min_duration: 2.5 # s
+    # Moderate compatibility guard at admission; this is intentionally not a
+    # near-convergence requirement.
+    join_activation_error_tolerance: 0.45 # m
+    switch_diagnostic_period: 0.10    # s
+
+    # Service-flight layer. Spool-up, takeoff, initial deployment, joining
+    # takeoff and return-to-charge occur outside the OMRS mission clock.
+    motor_spool_time: 1.0
+    initial_takeoff_stagger: 0.75
+    takeoff_height: 0.85
+    service_maximum_speed: 0.45
+    service_maximum_acceleration: 0.90
+    service_position_gain: 0.45
+    service_velocity_gain: 2.20
+    service_position_tolerance: 0.15
+    service_speed_tolerance: 0.12
+    takeoff_settle_time: 0.80
+    service_settle_time: 1.20
+
+    # A joining drone approaches the translation-aligned desired formation
+    # under the service controller first.  The handoff is based on both scalar
+    # distance and the relative-vector error: being merely inside d_max is not
+    # enough to characterize closeness to the prospective formation set.
+    # Hand prospective control a larger part of the rendezvous.  The vector-
+    # error guard still prevents assignment on the wrong side of a neighbor,
+    # but the candidate no longer needs to be almost at the final edge set.
+    join_capture_margin: 0.50
+    join_capture_error_tolerance: 0.75 # m; prospective edges start visibly farther away
+    join_capture_speed_tolerance: 0.30 # m/s
+
+    diagnostic_log_period: 1.0
+
+    # A mission is complete only after all requested membership switches are
+    # finished, no prospective / returning vehicle remains, and every
+    # established edge stays within these final formation tolerances for the
+    # requested settling interval.
+    completion_position_tolerance: 0.12
+    completion_velocity_tolerance: 0.12
+    completion_settle_time: 2.0
+    stop_on_mission_complete: true
+    return_to_charge_on_completion: true
+
+    # Automatic Gazebo data products. ``package_outputs`` resolves to
+    # <workspace>/src/constrained_omrs/outputs, so logs survive clean rebuilds
+    # and remain together with the experiment package.
+    save_results: true
+    save_animation: true
+    result_sample_rate_hz: 20.0
+    animation_fps: 15
+    animation_stride: 2
+    output_directory: "package_outputs"
+
+    # Draw interaction edges directly in the Gazebo GUI using MarkerManager.
+    # Native marker transport runs asynchronously and best-effort so a slow GUI
+    # (for example during screen recording) can never block the flight-control
+    # callback.  The 10 Hz marker rate is visually smooth while substantially
+    # reducing rendering / transport work. Established edges are thick dashed
+    # dark-green and prospective edges are thick dashed orange.
+    # Requires the Gazebo Transport
+    # Python bindings (python3-gz-transport13 and python3-gz-msgs10).
+    gazebo_edge_markers: true
+
+    # Debug-only mode to isolate the nominal fixed-topology formation controller.
+    fixed_team_only: false
+
+    # On Ctrl-C, save the partial GIF in addition to raw logs and all plots.
+    save_animation_on_interrupt: true
+
