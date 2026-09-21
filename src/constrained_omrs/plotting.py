@@ -296,7 +296,7 @@ def _trajectory_plot(result: SimulationResult, scenario: Scenario, output_dir: P
             ax.scatter(*p[0], marker="o", color=color, s=28)
             ax.scatter(*p[-1], marker="x", color=color, s=34)
 
-        # Show the final interaction geometry as a spatial snapshot.
+        # Show the final established interaction geometry as a spatial snapshot.
         final_edges = set(result.edge_history[-1])
         for i, j in final_edges:
             pi = result.positions[-1, i]
@@ -305,9 +305,10 @@ def _trajectory_plot(result: SimulationResult, scenario: Scenario, output_dir: P
                 [pi[0], pj[0]],
                 [pi[1], pj[1]],
                 [pi[2], pj[2]],
-                color="0.55",
-                linewidth=1.0,
-                alpha=0.7,
+                color="tab:green",
+                linestyle="--",
+                linewidth=1.4,
+                alpha=0.8,
             )
 
         final_active = result.active[-1]
@@ -826,7 +827,7 @@ def save_animation(
     tail_seconds: float = 5.0,
     rotate_3d_camera: bool = True,
 ) -> Path:
-    """Save an animation with solid established and dashed prospective edges.
+    """Save an animation with dashed green established and dashed orange prospective edges.
 
     The 3-D rendering additionally shows short trajectory tails and a
     translationally aligned representative of the current desired formation.
@@ -879,8 +880,8 @@ def save_animation(
                 i, j = edge
                 pi, pj = result.positions[k, i], result.positions[k, j]
                 artist.set_data([pi[0], pj[0]], [pi[1], pj[1]])
-                artist.set_linestyle("--" if edge in prospective else "-")
-                artist.set_color("0.35" if edge in established else "tab:orange")
+                artist.set_linestyle("--")
+                artist.set_color("tab:green" if edge in established else "tab:orange")
                 artist.set_visible(True)
             time_text.set_text(f"t={result.time[k]:.1f} s")
             return [*robot_artists, *edge_artists.values(), time_text]
@@ -941,7 +942,14 @@ def save_animation(
 
         ax.legend(
             handles=[
-                Line2D([0], [0], color="0.35", linewidth=2.0, label="established edge"),
+                Line2D(
+                    [0],
+                    [0],
+                    color="tab:green",
+                    linewidth=2.0,
+                    linestyle="--",
+                    label="established edge",
+                ),
                 Line2D(
                     [0],
                     [0],
@@ -1042,8 +1050,8 @@ def save_animation(
                     [pi[1], pj[1]],
                     [pi[2], pj[2]],
                 )
-                artist.set_linestyle("--" if edge in prospective else "-")
-                artist.set_color("0.35" if edge in established else "tab:orange")
+                artist.set_linestyle("--")
+                artist.set_color("tab:green" if edge in established else "tab:orange")
                 artist.set_alpha(0.9)
                 artist.set_visible(True)
 

@@ -454,3 +454,147 @@ def render_run_outputs(
         # convenience when ffmpeg is installed on the host.
         pass
     return paths
+
+
+def resolve_saved_run_directory(run_directory: str | Path | None = None) -> Path:
+    """Resolve an explicit Gazebo run directory or the package's latest run."""
+    if run_directory is not None and str(run_directory).strip():
+        run_dir = Path(run_directory).expanduser().resolve()
+    else:
+        latest = _source_package_outputs_directory() / "latest_run.txt"
+        if not latest.is_file():
+            raise FileNotFoundError(
+                f"Could not find {latest}. Pass a run directory explicitly."
+            )
+        run_dir = Path(latest.read_text(encoding="utf-8").strip()).expanduser().resolve()
+    if not run_dir.is_dir():
+        raise FileNotFoundError(f"Gazebo run directory does not exist: {run_dir}")
+    return run_dir
+
+
+def load_saved_gazebo_run(
+    run_directory: str | Path | None = None,
+):
+    """Reconstruct the plotting result from a previously saved Gazebo run.
+
+    This loader is intentionally aimed at deterministic post-processing.  It
+    combines the lossless numerical history with ``edge_diagnostics.csv`` and
+    ``summary.json`` so paper plots and plot animations can be regenerated
+    without rerunning Gazebo.
+    """
+    from constrained_omrs.quadrotor import QuadrotorConfig
+    from constrained_omrs.reconfiguration import SwitchEvent
+    from constrained_omrs.scenario import default_open_formation_scenario
+
+    run_dir = resolve_saved_run_directory(run_directory)
+    history_path = run_dir / "gazebo_history.npz"
+    summary_path = run_dir / "summary.json"
+    edge_path = run_dir / "edge_diagnostics.csv"
+    for required in (history_path, summary_path, edge_path):
+        if not required.is_file():
+            raise FileNotFoundError(f"Saved Gazebo run is missing: {required}")
+
+    with np.load(history_path, allow_pickle=False) as data:
+        arrays = {key: np.asarray(data[key]) for key in data.files}
+
+    time = np.asarray(arrays["time"], dtype=float)
+    if time.ndim != 1 or time.size < 2:
+        raise ValueError("gazebo_history.npz contains an invalid time vector.")
+    n_samples = len(time)
+
+    edge_history: list[list[tuple[int, int]]] = [[] for _ in range(n_samples)]
+    prospective_history: list[dict[tuple[int, int], float]] = [dict() for _ in range(n_samples)]
+    prospective_margin_history: list[dict[tuple[int, int], float]] = [dict() for _ in range(n_samples)]
+    inferred_dmin: list[float] = []
+    inferred_dmax: list[float] = []
+
+    def sample_index(t: float) -> int:
+        index = int(np.clip(np.searchsorted(time, t), 0, n_samples - 1))
+        candidates = [index]
+        if index > 0:
+            candidates.append(index - 1)
+        return min(candidates, key=lambda idx: abs(float(time[idx]) - t))
+
+    with edge_path.open("r", newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        for row in reader:
+            k = sample_index(float(row["time"]))
+            edge = (int(row["i"]), int(row["j"]))
+            kind = row["kind"].strip()
+            distance = float(row["distance"])
+            rho = float(row["rho"])
+            upper = float(row["upper_bound"])
+            lower_margin = float(row["lower_margin"])
+            upper_margin = float(row["upper_margin"])
+            inferred_dmin.append(distance - lower_margin)
+            inferred_dmax.append(upper - rho)
+            if kind == "prospective":
+                prospective_history[k][edge] = rho
+                prospective_margin_history[k][edge] = upper_margin
+            else:
+                edge_history[k].append(edge)
+
+    with summary_path.open("r", encoding="utf-8") as stream:
+        summary = json.load(stream)
+    switch_events = tuple(
+        SwitchEvent(
+            time=float(item["time"]),
+            kind=item["kind"],
+            robot=None if item.get("robot") is None else int(item["robot"]),
+            edges_added=tuple(tuple(int(value) for value in edge) for edge in item.get("edges_added", [])),
+            edges_removed=tuple(tuple(int(value) for value in edge) for edge in item.get("edges_removed", [])),
+        )
+        for item in summary.get("switch_events", [])
+    )
+
+    sample_dt = float(np.median(np.diff(time)))
+    scenario = default_open_formation_scenario(3)
+    dmin = float(np.median(inferred_dmin)) if inferred_dmin else scenario.collision_distance
+    dmax = float(np.median(inferred_dmax)) if inferred_dmax else scenario.sensing_distance
+    plot_scenario = replace(
+        scenario,
+        collision_distance=dmin,
+        sensing_distance=dmax,
+        duration=max(float(time[-1]), sample_dt),
+        dt=sample_dt,
+    )
+
+    def arr(name: str, *, dtype=float):
+        return np.asarray(arrays[name], dtype=dtype)
+
+    result = SimulationResult(
+        time=time,
+        positions=arr("positions"),
+        velocities=arr("velocities"),
+        controls=arr("raw_acceleration_commands"),
+        flight_acceleration_commands=arr("applied_acceleration_commands"),
+        realized_accelerations=arr("realized_accelerations"),
+        virtual_velocities=arr("virtual_velocities"),
+        lyapunov=arr("lyapunov"),
+        active=arr("active", dtype=bool),
+        controlled=arr("controlled", dtype=bool),
+        flight_controlled=arr("flight_controlled", dtype=bool),
+        returning=arr("returning", dtype=bool),
+        parked=arr("parked", dtype=bool),
+        edge_history=edge_history,
+        prospective_history=prospective_history,
+        prospective_margin_history=prospective_margin_history,
+        desired_positions=arr("desired_positions"),
+        min_pair_distance=arr("min_pair_distance"),
+        max_established_edge_distance=arr("max_established_edge_distance"),
+        position_edge_error_norm=arr("position_edge_error_norm"),
+        velocity_edge_error_norm=arr("velocity_edge_error_norm"),
+        switch_events=switch_events,
+        dynamics_model="quadrotor",
+        attitudes=arr("attitudes") if "attitudes" in arrays else None,
+        desired_attitudes=None,
+        angular_velocities=arr("angular_velocities") if "angular_velocities" in arrays else None,
+        thrusts=arr("commanded_thrusts") if "commanded_thrusts" in arrays else None,
+        commanded_thrusts=arr("commanded_thrusts") if "commanded_thrusts" in arrays else None,
+        torques=arr("commanded_torques") if "commanded_torques" in arrays else None,
+        commanded_torques=arr("commanded_torques") if "commanded_torques" in arrays else None,
+        attitude_errors=arr("attitude_errors") if "attitude_errors" in arrays else None,
+        desired_edge_history=None,
+        quadrotor_config=QuadrotorConfig(),
+    )
+    return result, plot_scenario, run_dir

@@ -237,3 +237,128 @@ ros2 launch constrained_omrs open_team_gazebo.launch.py recording_mode:=true
 ```
 
 The recording world uses a `2 ms` physics step and disables shadows while retaining simulation-time control.
+
+## Recording the final Gazebo video
+
+For a publication / presentation recording, use the dedicated recording mode:
+
+```bash
+ros2 launch constrained_omrs open_team_gazebo.launch.py \
+    video_recording:=true
+```
+
+This mode is deliberately interactive. Gazebo opens **paused**, loads a GUI
+layout with the native **Video Recorder** button, and automatically enables a
+Gazebo state log. The terminal prints a timestamped run directory, normally
+
+```text
+~/Videos/constrained_omrs/run_YYYYMMDD_HHMMSS/
+```
+
+Before starting the mission:
+
+1. adjust the Gazebo camera if desired;
+2. click the Video Recorder button and select MP4;
+3. press **Play** in Gazebo.
+
+The recorder uses Gazebo simulation time (`use_sim_time=true`), so moderate
+wall-time / real-time-factor variation does not stretch the saved movie.
+Lockstep recording is intentionally disabled to avoid unnecessarily slowing the
+simulation.
+
+At the end of the mission the controller does **not** immediately close Gazebo.
+Instead it prints a `VIDEO CAPTURE READY` message. Stop the Video Recorder and,
+in the save dialog, save the file inside the run directory printed by the
+terminal. The controller polls that directory; once the `.mp4` or `.ogv` file
+appears, it prints the exact video path and folder and then shuts down Gazebo
+automatically.
+
+The same run also stores a Gazebo simulation-state log below
+
+```text
+<run-directory>/gazebo_state/
+```
+
+which can later be replayed with
+
+```bash
+gz sim -r --playback <run-directory>/gazebo_state
+```
+
+The GUI video is the primary visual artifact. The state log is a useful backup
+for replaying the physical vehicle motion.
+
+The recording-related launch arguments are:
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `video_recording` | `false` | Enables the complete paused video-capture workflow. |
+| `start_paused` | `false` | Starts Gazebo paused independently of video recording. |
+| `record_gazebo_log` | `false` | Enables Gazebo state logging; implied by `video_recording:=true`. |
+| `video_output_directory` | timestamped folder under `~/Videos/constrained_omrs` | Folder in which the GUI video should be saved. |
+| `gazebo_log_path` | `<video_output_directory>/gazebo_state` | Gazebo `--record-path` destination. |
+| `recording_mode` | `false` | Selects the optional lower-load world; not required when the normal world runs comfortably in real time. |
+
+## Paper-plot animations for the video
+
+A completed Gazebo run can be post-processed into the same three plot groups used
+in the paper results figure, with the manuscript Matplotlib style and MATLAB
+ColorOrder:
+
+- detailed edge distances, including established / prospective segments and
+  the relaxed upper bound `d_max + rho_k`;
+- formation position error, velocity error, and composite BLF;
+- open-system robot and graph-edge counts.
+
+The curves are progressively revealed in simulation time and switch-event lines
+and labels appear when the corresponding event occurs.  The axes, line styles,
+labels, colors, and limits are fixed from the complete run, so nothing jumps or
+rescales while the video is playing.
+
+After a run has been saved, render all three animations with
+
+```bash
+uv run --no-sync python scripts/animate_paper_plots.py
+```
+
+With no positional argument the script reads `outputs/latest_run.txt`.  An
+explicit older run can instead be selected with
+
+```bash
+uv run --no-sync python scripts/animate_paper_plots.py \
+  outputs/run_YYYYMMDD_HHMMSS
+```
+
+The default output is
+
+```text
+outputs/run_YYYYMMDD_HHMMSS/paper_animations/
+├── paper_edge_distances_detailed.mp4
+├── paper_formation_performance.mp4
+└── open_system_counts.mp4
+```
+
+The default is 30 fps at real simulation speed (`--speed 1.0`), which makes the
+clips directly synchronizable with the Gazebo recording in Blender.  If the
+Gazebo footage is later accelerated, either accelerate all clips together in the
+editor or pre-render the plots at the same factor, for example
+
+```bash
+uv run --no-sync python scripts/animate_paper_plots.py --speed 2
+```
+
+Useful rendering options are
+
+```text
+--fps 30
+--dpi 180
+--speed 1.0
+--bitrate-kbps 6500
+--start-time <seconds>
+--end-time <seconds>
+--only edge_distances formation_performance open_system_counts
+```
+
+The animation script uses the saved `gazebo_history.npz`, `summary.json`, and
+`edge_diagnostics.csv`; Gazebo does not need to be rerun to change the video
+rendering settings.

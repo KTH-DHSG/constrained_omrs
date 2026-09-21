@@ -173,3 +173,32 @@ This repository accompanies:
 > **Safe Formation Control of Open Multi-Robot Systems with Connectivity-Preserving Reconfiguration**
 
 A full citation and paper link will be added when the manuscript becomes publicly available.
+
+### Record a Gazebo video
+
+For the final Gazebo video, launch the dedicated recording workflow:
+
+```bash
+ros2 launch constrained_omrs open_team_gazebo.launch.py video_recording:=true
+```
+
+Gazebo opens paused with the Video Recorder available, a Gazebo state log is
+recorded automatically, and the terminal prints the timestamped output folder.
+Start the recorder, press Play, and at mission completion stop the recorder and
+save the video in the printed folder. The controller detects the file, prints
+its exact path, and shuts down automatically. See
+[`docs/gazebo_simulation.md`](docs/gazebo_simulation.md) for details.
+
+### Animate the paper plots from a saved Gazebo run
+
+For video production, the three result plots used in the paper can be rendered
+as synchronized progressive MP4 animations directly from the saved Gazebo logs:
+
+```bash
+uv run --no-sync python scripts/animate_paper_plots.py
+```
+
+The clips are written to the latest run's `paper_animations/` directory.  They
+use the same paper-quality formatting and MATLAB color order as the static
+manuscript figures.  See [`docs/gazebo_simulation.md`](docs/gazebo_simulation.md)
+for rendering and synchronization options.

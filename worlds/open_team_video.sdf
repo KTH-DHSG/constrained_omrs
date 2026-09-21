@@ -1,0 +1,819 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <world name="open_team">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster">
+      <!-- Publish scene state at the recorder rate for efficient 25 FPS capture. -->
+      <state_hertz>25</state_hertz>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 12 0 0 0</pose>
+      <diffuse>0.88 0.88 0.88 1</diffuse>
+      <specular>0.18 0.18 0.18 1</specular>
+      <direction>-0.45 0.25 -0.85</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision"><geometry><plane><normal>0 0 1</normal><size>30 30</size></plane></geometry></collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>30 30</size></plane></geometry>
+          <material><ambient>0.58 0.61 0.64 1</ambient><diffuse>0.72 0.74 0.76 1</diffuse><specular>0.08 0.08 0.08 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="charging_station">
+      <static>true</static>
+      <pose>0 -3.15 0 0 0 0</pose>
+      <link name="platform">
+        <collision name="platform_collision"><pose>0 0 0.015 0 0 0</pose><geometry><box><size>3.25 1.65 0.03</size></box></geometry></collision>
+        <visual name="platform_visual"><pose>0 0 0.015 0 0 0</pose><geometry><box><size>3.25 1.65 0.03</size></box></geometry><material><ambient>0.10 0.11 0.13 1</ambient><diffuse>0.18 0.20 0.23 1</diffuse></material></visual>
+        <visual name="pad_0"><pose>-1.200 -0.400 0.034 0 0 0</pose><geometry><cylinder><radius>0.22</radius><length>0.008</length></cylinder></geometry><material><ambient>0.08 0.30 0.16 1</ambient><diffuse>0.10 0.55 0.25 1</diffuse><emissive>0.02 0.08 0.03 1</emissive></material></visual>
+        <visual name="pad_1"><pose>-0.400 -0.400 0.034 0 0 0</pose><geometry><cylinder><radius>0.22</radius><length>0.008</length></cylinder></geometry><material><ambient>0.08 0.30 0.16 1</ambient><diffuse>0.10 0.55 0.25 1</diffuse><emissive>0.02 0.08 0.03 1</emissive></material></visual>
+        <visual name="pad_2"><pose>0.400 -0.400 0.034 0 0 0</pose><geometry><cylinder><radius>0.22</radius><length>0.008</length></cylinder></geometry><material><ambient>0.08 0.30 0.16 1</ambient><diffuse>0.10 0.55 0.25 1</diffuse><emissive>0.02 0.08 0.03 1</emissive></material></visual>
+        <visual name="pad_3"><pose>1.200 -0.400 0.034 0 0 0</pose><geometry><cylinder><radius>0.22</radius><length>0.008</length></cylinder></geometry><material><ambient>0.08 0.30 0.16 1</ambient><diffuse>0.10 0.55 0.25 1</diffuse><emissive>0.02 0.08 0.03 1</emissive></material></visual>
+        <visual name="pad_4"><pose>1.200 0.400 0.034 0 0 0</pose><geometry><cylinder><radius>0.22</radius><length>0.008</length></cylinder></geometry><material><ambient>0.08 0.30 0.16 1</ambient><diffuse>0.10 0.55 0.25 1</diffuse><emissive>0.02 0.08 0.03 1</emissive></material></visual>
+        <visual name="pad_5"><pose>0.400 0.400 0.034 0 0 0</pose><geometry><cylinder><radius>0.22</radius><length>0.008</length></cylinder></geometry><material><ambient>0.08 0.30 0.16 1</ambient><diffuse>0.10 0.55 0.25 1</diffuse><emissive>0.02 0.08 0.03 1</emissive></material></visual>
+        <visual name="pad_6"><pose>-0.400 0.400 0.034 0 0 0</pose><geometry><cylinder><radius>0.22</radius><length>0.008</length></cylinder></geometry><material><ambient>0.08 0.30 0.16 1</ambient><diffuse>0.10 0.55 0.25 1</diffuse><emissive>0.02 0.08 0.03 1</emissive></material></visual>
+        <visual name="station_label">
+          <pose>0 -0.93 0.11 0 0 0</pose>
+          <geometry><box><size>1.15 0.10 0.14</size></box></geometry>
+          <material><ambient>0.10 0.25 0.35 1</ambient><diffuse>0.12 0.42 0.58 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="workspace_post_0"><static>true</static><pose>-2.7 1.7 0 0 0 0</pose><link name="link"><collision name="collision"><pose>0 0 0.45 0 0 0</pose><geometry><cylinder><radius>0.035</radius><length>0.9</length></cylinder></geometry></collision><visual name="visual"><pose>0 0 0.45 0 0 0</pose><geometry><cylinder><radius>0.035</radius><length>0.9</length></cylinder></geometry><material><diffuse>0.32 0.35 0.38 1</diffuse></material></visual></link></model>
+    <model name="workspace_post_1"><static>true</static><pose>2.7 1.7 0 0 0 0</pose><link name="link"><collision name="collision"><pose>0 0 0.45 0 0 0</pose><geometry><cylinder><radius>0.035</radius><length>0.9</length></cylinder></geometry></collision><visual name="visual"><pose>0 0 0.45 0 0 0</pose><geometry><cylinder><radius>0.035</radius><length>0.9</length></cylinder></geometry><material><diffuse>0.32 0.35 0.38 1</diffuse></material></visual></link></model>
+    <model name="workspace_post_2"><static>true</static><pose>-2.7 -1.5 0 0 0 0</pose><link name="link"><collision name="collision"><pose>0 0 0.45 0 0 0</pose><geometry><cylinder><radius>0.035</radius><length>0.9</length></cylinder></geometry></collision><visual name="visual"><pose>0 0 0.45 0 0 0</pose><geometry><cylinder><radius>0.035</radius><length>0.9</length></cylinder></geometry><material><diffuse>0.32 0.35 0.38 1</diffuse></material></visual></link></model>
+    <model name="workspace_post_3"><static>true</static><pose>2.7 -1.5 0 0 0 0</pose><link name="link"><collision name="collision"><pose>0 0 0.45 0 0 0</pose><geometry><cylinder><radius>0.035</radius><length>0.9</length></cylinder></geometry></collision><visual name="visual"><pose>0 0 0.45 0 0 0</pose><geometry><cylinder><radius>0.035</radius><length>0.9</length></cylinder></geometry><material><diffuse>0.32 0.35 0.38 1</diffuse></material></visual></link></model>
+
+    <include>
+      <uri>model://omrs_quadrotor</uri>
+      <name>drone_0</name>
+      <pose>-1.20000 -3.55000 0.16000 0 0 0</pose>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_0</robotNamespace>
+        <jointName>rotor_0_joint</jointName>
+        <linkName>rotor_0</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>0</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_0</robotNamespace>
+        <jointName>rotor_1_joint</jointName>
+        <linkName>rotor_1</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>1</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_0</robotNamespace>
+        <jointName>rotor_2_joint</jointName>
+        <linkName>rotor_2</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>2</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_0</robotNamespace>
+        <jointName>rotor_3_joint</jointName>
+        <linkName>rotor_3</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>3</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+        <odom_publish_frequency>100</odom_publish_frequency>
+        <dimensions>3</dimensions>
+        <odom_frame>world</odom_frame>
+        <robot_base_frame>drone_0/base_link</robot_base_frame>
+        <odom_topic>/model/drone_0/odometry</odom_topic>
+        <tf_topic>/model/drone_0/pose</tf_topic>
+      </plugin>
+    </include>
+
+    <include>
+      <uri>model://omrs_quadrotor</uri>
+      <name>drone_1</name>
+      <pose>-0.40000 -3.55000 0.16000 0 0 0</pose>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_1</robotNamespace>
+        <jointName>rotor_0_joint</jointName>
+        <linkName>rotor_0</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>0</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_1</robotNamespace>
+        <jointName>rotor_1_joint</jointName>
+        <linkName>rotor_1</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>1</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_1</robotNamespace>
+        <jointName>rotor_2_joint</jointName>
+        <linkName>rotor_2</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>2</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_1</robotNamespace>
+        <jointName>rotor_3_joint</jointName>
+        <linkName>rotor_3</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>3</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+        <odom_publish_frequency>100</odom_publish_frequency>
+        <dimensions>3</dimensions>
+        <odom_frame>world</odom_frame>
+        <robot_base_frame>drone_1/base_link</robot_base_frame>
+        <odom_topic>/model/drone_1/odometry</odom_topic>
+        <tf_topic>/model/drone_1/pose</tf_topic>
+      </plugin>
+    </include>
+
+    <include>
+      <uri>model://omrs_quadrotor</uri>
+      <name>drone_2</name>
+      <pose>0.40000 -3.55000 0.16000 0 0 0</pose>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_2</robotNamespace>
+        <jointName>rotor_0_joint</jointName>
+        <linkName>rotor_0</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>0</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_2</robotNamespace>
+        <jointName>rotor_1_joint</jointName>
+        <linkName>rotor_1</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>1</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_2</robotNamespace>
+        <jointName>rotor_2_joint</jointName>
+        <linkName>rotor_2</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>2</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_2</robotNamespace>
+        <jointName>rotor_3_joint</jointName>
+        <linkName>rotor_3</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>3</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+        <odom_publish_frequency>100</odom_publish_frequency>
+        <dimensions>3</dimensions>
+        <odom_frame>world</odom_frame>
+        <robot_base_frame>drone_2/base_link</robot_base_frame>
+        <odom_topic>/model/drone_2/odometry</odom_topic>
+        <tf_topic>/model/drone_2/pose</tf_topic>
+      </plugin>
+    </include>
+
+    <include>
+      <uri>model://omrs_quadrotor</uri>
+      <name>drone_3</name>
+      <pose>1.20000 -3.55000 0.16000 0 0 0</pose>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_3</robotNamespace>
+        <jointName>rotor_0_joint</jointName>
+        <linkName>rotor_0</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>0</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_3</robotNamespace>
+        <jointName>rotor_1_joint</jointName>
+        <linkName>rotor_1</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>1</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_3</robotNamespace>
+        <jointName>rotor_2_joint</jointName>
+        <linkName>rotor_2</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>2</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_3</robotNamespace>
+        <jointName>rotor_3_joint</jointName>
+        <linkName>rotor_3</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>3</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+        <odom_publish_frequency>100</odom_publish_frequency>
+        <dimensions>3</dimensions>
+        <odom_frame>world</odom_frame>
+        <robot_base_frame>drone_3/base_link</robot_base_frame>
+        <odom_topic>/model/drone_3/odometry</odom_topic>
+        <tf_topic>/model/drone_3/pose</tf_topic>
+      </plugin>
+    </include>
+
+    <include>
+      <uri>model://omrs_quadrotor</uri>
+      <name>drone_4</name>
+      <pose>1.20000 -2.75000 0.16000 0 0 0</pose>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_4</robotNamespace>
+        <jointName>rotor_0_joint</jointName>
+        <linkName>rotor_0</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>0</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_4</robotNamespace>
+        <jointName>rotor_1_joint</jointName>
+        <linkName>rotor_1</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>1</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_4</robotNamespace>
+        <jointName>rotor_2_joint</jointName>
+        <linkName>rotor_2</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>2</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_4</robotNamespace>
+        <jointName>rotor_3_joint</jointName>
+        <linkName>rotor_3</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>3</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+        <odom_publish_frequency>100</odom_publish_frequency>
+        <dimensions>3</dimensions>
+        <odom_frame>world</odom_frame>
+        <robot_base_frame>drone_4/base_link</robot_base_frame>
+        <odom_topic>/model/drone_4/odometry</odom_topic>
+        <tf_topic>/model/drone_4/pose</tf_topic>
+      </plugin>
+    </include>
+
+    <include>
+      <uri>model://omrs_quadrotor</uri>
+      <name>drone_5</name>
+      <pose>0.40000 -2.75000 0.16000 0 0 0</pose>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_5</robotNamespace>
+        <jointName>rotor_0_joint</jointName>
+        <linkName>rotor_0</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>0</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_5</robotNamespace>
+        <jointName>rotor_1_joint</jointName>
+        <linkName>rotor_1</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>1</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_5</robotNamespace>
+        <jointName>rotor_2_joint</jointName>
+        <linkName>rotor_2</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>2</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_5</robotNamespace>
+        <jointName>rotor_3_joint</jointName>
+        <linkName>rotor_3</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>3</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+        <odom_publish_frequency>100</odom_publish_frequency>
+        <dimensions>3</dimensions>
+        <odom_frame>world</odom_frame>
+        <robot_base_frame>drone_5/base_link</robot_base_frame>
+        <odom_topic>/model/drone_5/odometry</odom_topic>
+        <tf_topic>/model/drone_5/pose</tf_topic>
+      </plugin>
+    </include>
+
+    <include>
+      <uri>model://omrs_quadrotor</uri>
+      <name>drone_6</name>
+      <pose>-0.40000 -2.75000 0.16000 0 0 0</pose>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_6</robotNamespace>
+        <jointName>rotor_0_joint</jointName>
+        <linkName>rotor_0</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>0</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_6</robotNamespace>
+        <jointName>rotor_1_joint</jointName>
+        <linkName>rotor_1</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>1</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_6</robotNamespace>
+        <jointName>rotor_2_joint</jointName>
+        <linkName>rotor_2</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>2</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone_6</robotNamespace>
+        <jointName>rotor_3_joint</jointName>
+        <linkName>rotor_3</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.045</timeConstantUp>
+        <timeConstantDown>0.045</timeConstantDown>
+        <maxRotVelocity>900.0</maxRotVelocity>
+        <motorConstant>8.64197530864e-06</motorConstant>
+        <momentConstant>0.018</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>3</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+        <odom_publish_frequency>100</odom_publish_frequency>
+        <dimensions>3</dimensions>
+        <odom_frame>world</odom_frame>
+        <robot_base_frame>drone_6/base_link</robot_base_frame>
+        <odom_topic>/model/drone_6/odometry</odom_topic>
+        <tf_topic>/model/drone_6/pose</tf_topic>
+      </plugin>
+    </include>
+
+
+    <!-- Dedicated GUI for simulation-time / lockstep video capture. -->
+    <gui fullscreen="0">
+      <!--
+        Gazebo Harmonic GUI layout used for final OMRS video capture.
+        The world starts paused from the launch file. The Video Recorder uses
+        simulation-time timestamps so wall-time slowdowns do not stretch the movie.
+  Lockstep is deliberately disabled for stability on Gazebo Harmonic.
+      -->
+
+      <plugin filename="MinimalScene" name="3D View">
+        <gz-gui>
+          <title>3D View</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="string" key="state">docked</property>
+        </gz-gui>
+        <engine>ogre2</engine>
+        <scene>scene</scene>
+        <ambient_light>0.55 0.55 0.55</ambient_light>
+        <background_color>0.82 0.86 0.92</background_color>
+      </plugin>
+
+      <!-- Scene interaction and Gazebo marker support. -->
+      <plugin filename="EntityContextMenuPlugin" name="Entity context menu">
+        <gz-gui>
+          <property key="state" type="string">floating</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="GzSceneManager" name="Scene Manager">
+        <gz-gui>
+          <property key="state" type="string">floating</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="InteractiveViewControl" name="Interactive view control">
+        <gz-gui>
+          <property key="state" type="string">floating</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="CameraTracking" name="Camera Tracking">
+        <gz-gui>
+          <property key="state" type="string">floating</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="MarkerManager" name="Marker manager">
+        <gz-gui>
+          <property key="state" type="string">floating</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="SelectEntities" name="Select Entities">
+        <gz-gui>
+          <property key="state" type="string">floating</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="VisualizationCapabilities" name="Visualization Capabilities">
+        <gz-gui>
+          <property key="state" type="string">floating</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+
+      <!-- Play / pause button. -->
+      <plugin filename="WorldControl" name="World control">
+        <gz-gui>
+          <title>World control</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="bool" key="resizable">false</property>
+          <property type="double" key="height">72</property>
+          <property type="double" key="width">121</property>
+          <property type="double" key="z">1</property>
+          <property type="string" key="state">floating</property>
+          <anchors target="3D View">
+            <line own="left" target="left"/>
+            <line own="bottom" target="bottom"/>
+          </anchors>
+        </gz-gui>
+        <play_pause>true</play_pause>
+        <step>true</step>
+        <start_paused>true</start_paused>
+        <use_event>true</use_event>
+      </plugin>
+
+      <plugin filename="WorldStats" name="World stats">
+        <gz-gui>
+          <title>World stats</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="bool" key="resizable">false</property>
+          <property type="double" key="height">110</property>
+          <property type="double" key="width">290</property>
+          <property type="double" key="z">1</property>
+          <property type="string" key="state">floating</property>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="bottom" target="bottom"/>
+          </anchors>
+        </gz-gui>
+        <sim_time>true</sim_time>
+        <real_time_factor>true</real_time_factor>
+        <iterations>true</iterations>
+      </plugin>
+
+      <!-- Gazebo's native render-window recorder. -->
+      <plugin filename="VideoRecorder" name="VideoRecorder">
+        <gz-gui>
+          <property key="resizable" type="bool">false</property>
+          <property key="x" type="double">10</property>
+          <property key="y" type="double">10</property>
+          <property key="width" type="double">52</property>
+          <property key="height" type="double">52</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+        <record_video>
+          <use_sim_time>true</use_sim_time>
+          <lockstep>false</lockstep>
+          <bitrate>6000000</bitrate>
+        </record_video>
+      </plugin>
+
+      <plugin filename="ViewAngle" name="View angle">
+        <gz-gui>
+          <property type="string" key="state">docked_collapsed</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="ComponentInspector" name="Component inspector">
+        <gz-gui>
+          <property type="string" key="state">docked_collapsed</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="EntityTree" name="Entity tree">
+        <gz-gui>
+          <property type="string" key="state">docked_collapsed</property>
+        </gz-gui>
+      </plugin>
+    </gui>
+
+  </world>
+</sdf>

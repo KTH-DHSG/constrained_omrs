@@ -156,8 +156,7 @@ def test_bridge_has_clock_and_one_odom_and_motor_bridge_per_vehicle() -> None:
 def test_launch_passes_headless_as_a_gazebo_flag_not_ros_gz_argument() -> None:
     text = LAUNCH.read_text()
     assert '"headless": LaunchConfiguration("headless")' not in text
-    assert "headless_flag" in text
-    assert "-s " in text
+    assert 'gz_tokens.append("-s")' in text
     assert '"gz_args"' in text
     assert '"recording_mode"' in text
     assert "open_team_recording.sdf" in text
@@ -486,3 +485,31 @@ def test_gazebo_odometry_freshness_uses_source_simulation_timestamp() -> None:
     assert "msg.header.stamp" in controller
     assert "state_time + 1e-9 < state.last_state_time" in controller
     assert "state.last_state_time = state_time" in controller
+
+
+def test_video_recording_launch_workflow_is_packaged():
+    launch_text = LAUNCH.read_text()
+    assert '"video_recording"' in launch_text
+    assert '"start_paused"' in launch_text
+    assert '"record_gazebo_log"' in launch_text
+    assert '"video_output_directory"' in launch_text
+    assert '"gazebo_log_path"' in launch_text
+    assert '"--record-path"' in launch_text
+    assert '"--gui-config"' in launch_text
+
+    gui_config = (ROOT / "config" / "video_recording_gui.config").read_text()
+    assert 'filename="VideoRecorder"' in gui_config
+    assert "<use_sim_time>true</use_sim_time>" in gui_config
+    assert "<lockstep>false</lockstep>" in gui_config
+    assert "<bitrate>6000000</bitrate>" in gui_config
+    assert 'filename="WorldControl"' in gui_config
+    assert 'filename="MarkerManager"' in gui_config
+
+
+def test_gazebo_controller_reports_saved_external_video():
+    controller = (ROOT / "src" / "constrained_omrs_ros" / "gazebo_controller.py").read_text()
+    assert 'declare_parameter("video_recording_mode", False)' in controller
+    assert 'declare_parameter("video_output_directory", "")' in controller
+    assert "Gazebo video saved to:" in controller
+    assert "Gazebo video folder:" in controller
+    assert "VIDEO CAPTURE READY" in controller

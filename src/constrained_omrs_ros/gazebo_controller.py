@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 from dataclasses import dataclass, replace
+from pathlib import Path
 from threading import Thread
 from time import perf_counter
 
@@ -147,6 +148,12 @@ class OpenTeamGazeboController(Node):
         self.declare_parameter("gazebo_edge_markers", True)
         self.declare_parameter("fixed_team_only", False)
         self.declare_parameter("save_animation_on_interrupt", True)
+        # External Gazebo GUI video capture.  The launch file enables this
+        # mode only for dedicated recording runs.  The controller stays alive
+        # after mission completion until the Video Recorder file appears in the
+        # configured directory, then reports the exact path and shuts down.
+        self.declare_parameter("video_recording_mode", False)
+        self.declare_parameter("video_output_directory", "")
 
         self.control_rate_hz = float(self.get_parameter("control_rate_hz").value)
         self.marker_rate_hz = float(self.get_parameter("marker_rate_hz").value)
@@ -222,6 +229,28 @@ class OpenTeamGazeboController(Node):
         self.save_animation_on_interrupt = bool(self.get_parameter("save_animation_on_interrupt").value)
         self.output_directory = str(self.get_parameter("output_directory").value)
         self.gazebo_edge_markers_enabled = bool(self.get_parameter("gazebo_edge_markers").value)
+        self.video_recording_mode = bool(
+            self.get_parameter("video_recording_mode").value
+        )
+        self.video_output_directory = str(
+            self.get_parameter("video_output_directory").value
+        ).strip()
+        if self.video_recording_mode:
+            if not self.video_output_directory:
+                raise ValueError(
+                    "video_output_directory must be nonempty when video_recording_mode is enabled."
+                )
+            video_dir = Path(self.video_output_directory).expanduser().resolve()
+            video_dir.mkdir(parents=True, exist_ok=True)
+            self.video_output_directory = str(video_dir)
+            self._video_files_at_start = {
+                path.resolve()
+                for pattern in ("*.mp4", "*.ogv")
+                for path in video_dir.glob(pattern)
+                if path.is_file()
+            }
+        else:
+            self._video_files_at_start: set[Path] = set()
 
         for name in (
             "control_rate_hz", "marker_rate_hz", "odom_timeout", "motor_constant",
@@ -387,6 +416,9 @@ class OpenTeamGazeboController(Node):
         self._result_paths: list[str] = []
         self._result_directory: str | None = None
         self._shutdown_requested = False
+        self._video_completion_prompt_logged = False
+        self._video_saved_logged = False
+        self._last_video_scan_wall = -np.inf
         self.exception_log_rows: list[dict[str, object]] = []
         self.last_exception_snapshot_time = -np.inf
 
@@ -1706,6 +1738,40 @@ class OpenTeamGazeboController(Node):
         if self.return_to_charge_on_completion:
             self._begin_post_mission_recovery(now)
 
+    def _find_saved_external_video(self) -> Path | None:
+        """Return the newest Gazebo GUI video in the configured run directory."""
+        if not self.video_recording_mode or not self.video_output_directory:
+            return None
+        directory = Path(self.video_output_directory)
+        candidates: list[Path] = []
+        for pattern in ("*.mp4", "*.ogv"):
+            candidates.extend(
+                path
+                for path in directory.glob(pattern)
+                if path.is_file() and path.resolve() not in self._video_files_at_start
+            )
+        if not candidates:
+            return None
+        return max(candidates, key=lambda path: path.stat().st_mtime)
+
+    def _report_external_video_on_exit(self) -> None:
+        """Print the actual video file / folder before the ROS node disappears."""
+        if not self.video_recording_mode or not self.video_output_directory:
+            return
+        video = self._find_saved_external_video()
+        if video is not None:
+            self.get_logger().info(
+                "Gazebo video saved to: %s" % video.resolve()
+            )
+            self.get_logger().info(
+                "Gazebo video folder: %s" % video.resolve().parent
+            )
+        else:
+            self.get_logger().warning(
+                "No Gazebo MP4/OGV was found before shutdown. Expected video folder: %s"
+                % Path(self.video_output_directory).resolve()
+            )
+
     def _poll_completion_output(self) -> None:
         if not self.mission_complete or not self._results_done:
             return
@@ -1728,6 +1794,44 @@ class OpenTeamGazeboController(Node):
                 )
 
         if self.return_to_charge_on_completion and np.any(self.returning):
+            return
+
+        if self.video_recording_mode:
+            if not self._video_completion_prompt_logged:
+                self._video_completion_prompt_logged = True
+                self.get_logger().info(
+                    "================ VIDEO CAPTURE READY ================"
+                )
+                self.get_logger().info(
+                    "Mission, result generation, and post-mission recovery are complete."
+                )
+                self.get_logger().info(
+                    "Stop the Gazebo Video Recorder now and save the MP4/OGV in: %s"
+                    % self.video_output_directory
+                )
+                self.get_logger().info(
+                    "The controller will detect the saved file, print its exact path, "
+                    "and shut down automatically."
+                )
+
+            # Do not hit the filesystem at 100 Hz.  A 0.5 s wall-time poll is
+            # more than enough to notice the file after the save dialog closes.
+            wall_now = perf_counter()
+            if wall_now - self._last_video_scan_wall >= 0.5:
+                self._last_video_scan_wall = wall_now
+                video = self._find_saved_external_video()
+                if video is not None and not self._shutdown_requested:
+                    self._video_saved_logged = True
+                    self._shutdown_requested = True
+                    self.get_logger().info(
+                        "Gazebo video saved to: %s" % video.resolve()
+                    )
+                    self.get_logger().info(
+                        "Gazebo video folder: %s" % video.resolve().parent
+                    )
+                    self._publish_all_off()
+                    self.timer.cancel()
+                    rclpy.shutdown()
             return
 
         if self.stop_on_mission_complete and not self._shutdown_requested:
@@ -2288,6 +2392,8 @@ def main(args: list[str] | None = None) -> None:
         if rclpy.ok():
             for robot in range(node.num_robots):
                 node._publish_motor_speeds(robot, np.zeros(4))
+        if node.video_recording_mode and not node._video_saved_logged:
+            node._report_external_video_on_exit()
         node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
